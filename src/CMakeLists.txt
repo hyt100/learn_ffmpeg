@@ -1,4 +1,5 @@
 add_executable(001 001_remove_yuv_color.cc)
+target_link_libraries(001 util)
 
 add_executable(010 010_capture.cc)
 target_link_libraries(010 util SDL2 pthread)

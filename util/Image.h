@@ -45,16 +45,22 @@ struct Frame
 FileFormat guess_file_format(const char *filename);
 int fill_array(uint8_t *plane[4], int stride[4], uint8_t *data, PixelFormat fmt, int width, int height, int align);
 
-Frame* frame_alloc();
-int frame_free(Frame *f);
-int frame_size(PixelFormat fmt, int width, int height, int align);
-bool frame_is_contiguous(Frame *f);
+int image_size(PixelFormat fmt, int width, int height, int align);
+bool image_is_contiguous(Frame *f);
 
+// The allocated Frame has to be freed by using image_free.
 Frame* image_alloc(PixelFormat fmt, int width, int height, int align);
+// The allocated Frame has to be freed by using image_free.
+Frame* image_alloc_with_data(PixelFormat fmt, int width, int height, uint8_t *data, int len);
+// The allocated Frame has to be freed by using image_free.
+Frame* image_read(const char *filename, PixelFormat fmt, int width, int height, int align);
+
 int image_free(Frame *f);
+
 int image_save(const char* filename, Frame *f);
 int image_copy(uint8_t *dst_plane[4], int dst_stride[4],
-               const uint8_t *src_plane[4], const int src_stride[4],
+               uint8_t *src_plane[4], int src_stride[4],
                PixelFormat fmt, int width, int height);
+int image_copy(Frame *dst, Frame *src);
 
 }

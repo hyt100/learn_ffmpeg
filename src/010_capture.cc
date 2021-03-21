@@ -181,13 +181,8 @@ static int update(void *data)
         int index = buf.index;
 
         // 拷贝数据
-        int src_stride[4] = {0};
-        uint8_t *src_plane[4] = {nullptr};
-        fill_array(src_plane, src_stride, (uint8_t *)framebuf[index].start, PIXFMT_YUY2, width, height, 1);
-
-        Frame *dst_frame = image_alloc(PIXFMT_YUY2, width, height, 1);
-        image_copy(dst_frame->plane, dst_frame->stride, (const uint8_t **)src_plane, src_stride, PIXFMT_YUY2, width, height);
-        frameQueue.put(dst_frame);
+        Frame *frame = image_alloc_with_data(PIXFMT_YUY2, width, height, (uint8_t *)framebuf[index].start, framebuf[index].len);
+        frameQueue.put(frame);
 
         // 发送事件，通知渲染
         event.type = MY_FLUSH_EVT;

@@ -1,4 +1,12 @@
+> 常用命令：
+>
+> ​    播放NV12:                ffplay -f rawvideo -pixel_format nv12 -video_size 650x850 650x850.nv12
+>
+> ​    其他文件转NV12：  ffmpeg -i xiyang.jpeg -f rawvideo -pix_fmt nv12 640x850.nv12
+
 #### 001 非ffmpeg: 去除YUV彩色
+
+去除色彩，只需要将UV的值均改为0x80.
 
 #### 002 非ffmpeg: YUV画中画
 
