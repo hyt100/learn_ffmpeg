@@ -36,13 +36,12 @@ struct video_framebuf
 #define VIDEO_FRAMEBUF_CNT     20
 #define CAMERA_DEV     "/dev/video0"
 
-static bool thread_pause = false;
 static bool thread_exit = false;
-static int width;
-static int height;
-static int screen_width;
-static int screen_height;
-static int video_fd;
+static int width = 640;
+static int height = 480;
+static int screen_width = width;
+static int screen_height = height;
+static int video_fd = -1;
 static std::array<video_framebuf, VIDEO_FRAMEBUF_CNT> framebuf;
 static BlockingQueue<Frame *> frameQueue;
 
@@ -160,7 +159,7 @@ static int update(void *data)
     while (!thread_exit) {
         FD_ZERO(&rfds);
         FD_SET(video_fd, &rfds);
-        tv.tv_sec = 5;
+        tv.tv_sec = 3;
         tv.tv_usec = 0;
 
         int ret = select(video_fd+1, &rfds, NULL, NULL, &tv);
