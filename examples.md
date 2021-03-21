@@ -50,6 +50,8 @@
 # ffplay -f avfoundation -framerate 30 -pixel_format yuyv422 -video_size 640x480 -i "0"   //播放设备0
 ```
 
+#### 011 非ffmpeg: 给YUV增加黑色边框
+
 #### 100 读取USB Camera 
 
 #### 101 JPG解码YUV

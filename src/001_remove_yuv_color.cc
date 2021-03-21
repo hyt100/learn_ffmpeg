@@ -1,6 +1,8 @@
 #include <iostream>
 #include "Image.h"
 
+// ffplay -f rawvideo -pixel_format nv12 -video_size 650x850 650x850.nv12
+
 using std::cout;
 using std::endl;
 using namespace image;
