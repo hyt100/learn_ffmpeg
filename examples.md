@@ -35,6 +35,11 @@
 
 5. 查看图像
 # ffplay -i /dev/video0
+# ffplay -f v4l2 -input_format mjpeg -i /dev/video0       //指定摄像头输出格式为mjpeg
+
+6. 查看图像(Mac平台)
+# ffmpeg -f avfoundation -list_devices true -i ""         //列出所有设备
+# ffplay -f avfoundation -framerate 30 -pixel_format yuyv422 -video_size 640x480 -i "0"   //播放设备0
 ```
 
 #### 100 读取USB Camera 
