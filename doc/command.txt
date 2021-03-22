@@ -1,0 +1,11 @@
+转换：
+ffmpeg -i lena_512x512.jpg -vf scale=128:128 lena_128x128.jpg 
+ffmpeg -i lena_512x512.jpg -f rawvideo -pix_fmt rgb24 lena_512x512.rgb24
+ffmpeg -i lena_512x512.jpg -f rawvideo -pix_fmt nv12 lena_512x512.nv12
+
+
+播放：
+ffplay -f rawvideo -pixel_format rgb24 -video_size 512x512 lena_512x512.rgb24
+ffplay -f rawvideo -pixel_format nv12 -video_size 512x512 lena_512x512.nv12
+
+

@@ -1,9 +1,3 @@
-> 常用命令：
->
-> ​    播放NV12:                ffplay -f rawvideo -pixel_format nv12 -video_size 650x850 650x850.nv12
->
-> ​    其他文件转NV12：  ffmpeg -i xiyang.jpeg -f rawvideo -pix_fmt nv12 640x850.nv12
-
 #### 001 非ffmpeg: 去除YUV彩色
 
 去除色彩，只需要将UV的值均改为0x80.
@@ -52,6 +46,12 @@
 
 #### 011 非ffmpeg: 给YUV增加黑色边框
 
+#### 012 非ffmpeg: OPENGL渲染视频
+
+#### 013 非ffmpeg: YUV转RGB，OPENGL实现
+
+---
+
 #### 100 读取USB Camera 
 
 #### 101 JPG解码YUV
@@ -69,6 +69,10 @@
 #### MP4转TS
 
 #### MP4提取H264
+
+
+
+
 
 
 

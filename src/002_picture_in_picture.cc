@@ -3,6 +3,8 @@
 #include <string.h>
 #include "Image.h"
 
+// ffmpeg -i lena_512x512.jpg  -vf scale=128:128 lena_128x128.jpg 
+// ffmpeg -i lena_512x512.jpg -f rawvideo -pix_fmt nv12 lena_512x512.nv12
 // ffplay -f rawvideo -pixel_format nv12 -video_size 512x512 merge.nv12
 
 using std::cout;
