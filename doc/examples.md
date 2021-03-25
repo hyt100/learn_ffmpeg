@@ -52,9 +52,13 @@ MAC:
 
 ---
 
-#### 100 读取USB Camera (TODO)
+#### 100 读取USB Camera - MJPEG
 
-#### 101 JPG解码YUV (TODO)
+#### 101 读取USB Camera - YUY2
+
+#### 102 JPG解码YUV 
+
+#### 103 H264解码YUV
 
 #### PNG解码YUV (TODO)
 
