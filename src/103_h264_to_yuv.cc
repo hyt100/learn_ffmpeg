@@ -125,7 +125,7 @@ int VideoDecoderDecodeDoing(VideoDecoder *decoder, AVPacket *pkt)
             return -1;
         }
 
-        printf("Decode frame %3d\n", decoder->codec_ctx->frame_number);
+        // printf("Decode frame %3d\n", decoder->codec_ctx->frame_number);
         decoder->callback(0, decoder->frame, decoder->ctx);
 
         // av_frame_unref(decoder->frame);  //可以不需要
@@ -160,7 +160,12 @@ int VideoDecoderDecode(VideoDecoder *decoder, uint8_t *buf, int len)
         left -= ret;
 
         if (decoder->pkt->size) {
-            printf("ret = %d  size = %d \n", ret, decoder->pkt->size);
+            // printf("ret = %d  size = %d \n", ret, decoder->pkt->size);
+            printf("pic type: %c     keyframe:%d    %dx%d    \n", 
+                    av_get_picture_type_char((enum AVPictureType)decoder->parser_ctx->pict_type), 
+                    decoder->parser_ctx->key_frame,
+                    decoder->parser_ctx->width, decoder->parser_ctx->height);
+
             if (VideoDecoderDecodeDoing(decoder, decoder->pkt) < 0) {
                 fprintf(stderr, "Error while do decode \n");
                 return -1;
@@ -172,18 +177,19 @@ int VideoDecoderDecode(VideoDecoder *decoder, uint8_t *buf, int len)
 }
 
 ///////////////////////////////////////////////////////////////////////
-static const char *src_file = "../res/640x360.h264";
+// static const char *src_file = "../res/640x360.h264";
+static const char *src_file = "../res/bad/640x360.h264";
 static const char *dst_file = "640x360.yuv";
 
 void decode_callback(int result, AVFrame *frame, void *ctx)
 {
     // printf("callback...\n");
     if (result == AVERROR(EAGAIN)) {
-        printf("decode wait...\n");
+        // printf("decode wait...\n");
     } else if (result == AVERROR_EOF) {
         printf("decode eof...\n");
     } else {
-        printf("decode ok: %dx%d  %s \n", frame->width, frame->height, av_get_pix_fmt_name((enum AVPixelFormat)frame->format));
+        // printf("decode ok: %dx%d  %s \n", frame->width, frame->height, av_get_pix_fmt_name((enum AVPixelFormat)frame->format));
         imageff::ff_save_frame((FILE *)ctx, frame);
     }
 }

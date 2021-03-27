@@ -10,4 +10,5 @@ link_directories(thirdparty/)
 
 add_subdirectory(util)
 add_subdirectory(util_ff)
+add_subdirectory(tools)
 add_subdirectory(src EXCLUDE_FROM_ALL)
