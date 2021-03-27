@@ -5,7 +5,7 @@ using std::cout;
 using std::endl;
 using namespace imageff;
 
-int imageff::ff_save_frame(const char *filename, AVFrame *frame)
+int imageff::ff_save_frame(FILE *fp, AVFrame *frame)
 {
     /* allocate image where the decoded image will be put */
     uint8_t *video_dst_data[4] = {NULL};
@@ -20,16 +20,22 @@ int imageff::ff_save_frame(const char *filename, AVFrame *frame)
                   (enum AVPixelFormat)frame->format, frame->width, frame->height);
 
     /* write to rawvideo file */
-    FILE *fp = fopen(filename, "wb");
     fwrite(video_dst_data[0], 1, video_dst_bufsize, fp);
-    fclose(fp);
 
     /* free image */
     av_free(video_dst_data[0]);
     return 0;
 }
 
-int imageff::ff_save_frame(const char *filename, AVPacket *pkt)
+int imageff::ff_save_frame(const char *filename, AVFrame *frame)
+{
+    FILE *fp = fopen(filename, "wb");
+    ff_save_frame(fp, frame);
+    fclose(fp);
+    return 0;
+}
+
+int imageff::ff_save_packet(const char *filename, AVPacket *pkt)
 {
     if (pkt->size <= 0) {
         cout << "ff_save_frame failed (size is 0)" << endl;

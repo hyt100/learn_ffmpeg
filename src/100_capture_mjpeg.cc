@@ -128,7 +128,8 @@ static int update(void *data)
 
         av_packet_unref(&pkt);
 
-        if (avcodec_receive_frame(codec_ctx, frame) < 0) {
+        //avcodec_receive_frame内部会先调用av_frame_unref(frame)
+        if (avcodec_receive_frame(codec_ctx, frame) < 0) { 
             fprintf(stderr, "Failed to get frame\n");
             break;
         }

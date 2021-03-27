@@ -14,7 +14,7 @@ namespace imageff {
 
 
 int ff_save_frame(const char *filename, AVFrame *frame);
-int ff_save_frame(const char *filename, AVPacket *pkt);
-
+int ff_save_packet(const char *filename, AVPacket *pkt);
+int ff_save_frame(FILE *fp, AVFrame *frame);
 
 }
