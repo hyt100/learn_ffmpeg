@@ -7,6 +7,7 @@ ffmpeg -i lena_512x512.jpg -f rawvideo -pix_fmt nv12 lena_512x512.nv12
 播放：
 ffplay -f rawvideo -pixel_format rgb24 -video_size 512x512 lena_512x512.rgb24
 ffplay -f rawvideo -pixel_format nv12 -video_size 512x512 lena_512x512.nv12
+ffplay -f rawvideo -pixel_format yuv420p -video_size 512x512 lena_512x512.yuv420p
 
 从摄像头播放：
 ffplay -i /dev/video0

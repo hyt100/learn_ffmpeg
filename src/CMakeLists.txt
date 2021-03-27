@@ -14,13 +14,13 @@ add_executable(010 010_capture.cc)
 target_link_libraries(010 util SDL2 pthread)
 
 add_executable(100 100_capture_mjpeg.cc)
-target_link_libraries(100 avdevice avfilter avformat avcodec swresample swscale avutil SDL2 m rt z pthread util)
+target_link_libraries(100 util avdevice avfilter avformat avcodec swresample swscale avutil SDL2 m rt z pthread)
 
 add_executable(101 101_capture_yuy2.cc)
-target_link_libraries(101 avdevice avfilter avformat avcodec swresample swscale avutil SDL2 m rt z pthread util)
+target_link_libraries(101 util avdevice avfilter avformat avcodec swresample swscale avutil SDL2 m rt z pthread)
 
 add_executable(102 102_jpg2yuv.cc)
-target_link_libraries(102 avformat avcodec avfilter swresample swscale avutil m z rt pthread)
+target_link_libraries(102 util_ff avformat avcodec avfilter swresample swscale avutil m z rt pthread)
 
 add_executable(103 103_h264_to_yuv.cc)
 target_link_libraries(103 avformat avcodec avfilter swresample swscale avutil m z rt pthread)
