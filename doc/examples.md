@@ -71,7 +71,7 @@ MAC:
 x264源码安装默认不会安装库，需要增加配置： 
 
 ```shell
-# ./configure --enable-shared
+# ./configure --enable-shared --enable-static
 ```
 
 然后重新编译ffmpeg:
@@ -80,7 +80,18 @@ x264源码安装默认不会安装库，需要增加配置：
 # ./configure --enable-libx264 --enable-gpl
 ```
 
-编码器使用x264，代码中的名字是`libx264`。
+验证x264是否生效：
+
+```shell
+# ffmpeg -h encoder=libx264      //可以看到x264支持格式信息
+# ldd libavcodec.so              //可以看到库依赖libx264.so
+```
+
+编码器使用x264，代码中的名字是`libx264`:
+
+```c++
+avcodec_find_encoder_by_name("libx264");
+```
 
 #### PNG解码YUV (TODO)
 
@@ -96,7 +107,7 @@ x264源码安装默认不会安装库，需要增加配置：
 
 #### MP4提取H264 (TODO)
 
-
+#### MP4抽帧 (TODO)
 
 
 
