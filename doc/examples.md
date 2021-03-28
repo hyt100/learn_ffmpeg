@@ -50,6 +50,8 @@ MAC:
 
 #### 013 非ffmpeg: YUV转RGB，OPENGL实现 (TODO)
 
+#### 非ffmpeg: 搜索H264文件NALU (TODO)
+
 ---
 
 #### 100 读取USB Camera - MJPEG
@@ -58,9 +60,11 @@ MAC:
 
 #### 102 JPG解码YUV 
 
-#### 103 H264解码YUV
+#### 103 YUV编码JPG (TODO)
 
-#### 104 YUV编码H264
+#### 104 H264解码YUV
+
+#### 105 YUV编码H264
 
 #### PNG解码YUV (TODO)
 

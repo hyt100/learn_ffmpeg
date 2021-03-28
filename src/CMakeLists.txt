@@ -22,5 +22,11 @@ target_link_libraries(101 util avdevice avfilter avformat avcodec swresample sws
 add_executable(102 102_jpg2yuv.cc)
 target_link_libraries(102 util_ff avformat avcodec avfilter swresample swscale avutil m z rt pthread)
 
-add_executable(103 103_h264_to_yuv.cc)
+add_executable(103 103_yuv2jpg.cc)
 target_link_libraries(103 util_ff avformat avcodec avfilter swresample swscale avutil m z rt pthread)
+
+add_executable(104 104_h264_to_yuv.cc)
+target_link_libraries(104 util_ff avformat avcodec avfilter swresample swscale avutil m z rt pthread)
+
+add_executable(105 105_yuv_to_h264.cc)
+target_link_libraries(105 util_ff avformat avcodec avfilter swresample swscale avutil m z rt pthread)
