@@ -47,5 +47,13 @@ int imageff::ff_save_packet(const char *filename, AVPacket *pkt)
     return 0;
 }
 
-
+int imageff::ff_save_packet(FILE *fp, AVPacket *pkt)
+{
+    if (pkt->size <= 0) {
+        cout << "ff_save_frame failed (size is 0)" << endl;
+        return -1;
+    }
+    fwrite(pkt->data, 1, pkt->size, fp);
+    return 0;
+}
 

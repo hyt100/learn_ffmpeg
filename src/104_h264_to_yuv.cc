@@ -12,11 +12,18 @@ extern "C" {
 
 // ffmpeg -i 640x360.mp4 -codec copy -bsf: h264_mp4toannexb -f h264 640x360.h264
 // ffplay 640x360.h264
-// ffplay -f rawvideo -pixel_format yuv420p -video_size 640x360 640x360.yuv
+// ffplay -f rawvideo -pixel_format yuv420p -video_size 640x360 video_640x360.yuv420p
 
 #define INBUF_SIZE 4096
 
-typedef void (*DecodeCallback)(int result, AVFrame *frame, void *ctx);
+enum VideoCodecResult {
+    VIDEOCODEC_RET_NORMAL = 0,
+    VIDEOCODEC_RET_EOF,
+    VIDEOCODEC_RET_WAIT,
+    VIDEOCODEC_RET_ERROR
+};
+
+typedef void (*DecodeCallback)(VideoCodecResult result, AVFrame *frame, void *ctx);
 
 struct VideoDecoder {
     AVCodecParserContext *parser_ctx;
@@ -117,8 +124,11 @@ int VideoDecoderDecodeDoing(VideoDecoder *decoder, AVPacket *pkt)
     while (ret >= 0) {
         //avcodec_receive_frame内部会先调用av_frame_unref(frame)
         ret = avcodec_receive_frame(decoder->codec_ctx, decoder->frame);
-        if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
-            decoder->callback(ret, NULL, decoder->ctx);
+        if (ret == AVERROR(EAGAIN)) {
+            decoder->callback(VIDEOCODEC_RET_WAIT, NULL, decoder->ctx);
+            return 0;
+        } else if (ret == AVERROR_EOF) {
+            decoder->callback(VIDEOCODEC_RET_EOF, NULL, decoder->ctx);
             return 0;
         } else if (ret < 0) {
             fprintf(stderr, "Error during decoding\n");
@@ -126,7 +136,7 @@ int VideoDecoderDecodeDoing(VideoDecoder *decoder, AVPacket *pkt)
         }
 
         // printf("Decode frame %3d\n", decoder->codec_ctx->frame_number);
-        decoder->callback(0, decoder->frame, decoder->ctx);
+        decoder->callback(VIDEOCODEC_RET_NORMAL, decoder->frame, decoder->ctx);
 
         // av_frame_unref(decoder->frame);  //可以不需要
     }
@@ -177,18 +187,18 @@ int VideoDecoderDecode(VideoDecoder *decoder, uint8_t *buf, int len)
 }
 
 ///////////////////////////////////////////////////////////////////////
-// static const char *src_file = "../res/640x360.h264";
-static const char *src_file = "../res/bad/640x360.h264";
-static const char *dst_file = "640x360.yuv";
+static const char *src_file = "../res/640x360.h264";
+// static const char *src_file = "../res/bad/640x360.h264";
+static const char *dst_file = "video_640x360.yuv420p";
 
-void decode_callback(int result, AVFrame *frame, void *ctx)
+void decode_callback(VideoCodecResult result, AVFrame *frame, void *ctx)
 {
     // printf("callback...\n");
-    if (result == AVERROR(EAGAIN)) {
+    if (result == VIDEOCODEC_RET_WAIT) {
         // printf("decode wait...\n");
-    } else if (result == AVERROR_EOF) {
+    } else if (result == VIDEOCODEC_RET_EOF) {
         printf("decode eof...\n");
-    } else {
+    } else if (result == VIDEOCODEC_RET_NORMAL) {
         // printf("decode ok: %dx%d  %s \n", frame->width, frame->height, av_get_pix_fmt_name((enum AVPixelFormat)frame->format));
         imageff::ff_save_frame((FILE *)ctx, frame);
     }

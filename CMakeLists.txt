@@ -6,7 +6,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include_directories(util/)
 include_directories(util_ff/)
-link_directories(thirdparty/)
+include_directories(thirdparty/include)
+link_directories(thirdparty/lib)
 
 add_subdirectory(util)
 add_subdirectory(util_ff)

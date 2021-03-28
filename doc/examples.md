@@ -1,3 +1,5 @@
+> 采用FFmpeg版本：4.3.2
+
 #### 001 非ffmpeg: 去除YUV彩色
 
 去除色彩，只需要将UV的值均改为0x80.
@@ -65,6 +67,20 @@ MAC:
 #### 104 H264解码YUV
 
 #### 105 YUV编码H264
+
+x264源码安装默认不会安装库，需要增加配置： 
+
+```shell
+# ./configure --enable-shared
+```
+
+然后重新编译ffmpeg:
+
+```shell
+# ./configure --enable-libx264 --enable-gpl
+```
+
+编码器使用x264，代码中的名字是`libx264`。
 
 #### PNG解码YUV (TODO)
 
