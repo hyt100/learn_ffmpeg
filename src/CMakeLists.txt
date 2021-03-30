@@ -30,3 +30,6 @@ target_link_libraries(104 util_ff avformat avcodec avfilter swresample swscale a
 
 add_executable(105 105_yuv_to_h264.cc)
 target_link_libraries(105 util_ff avformat avcodec avfilter swresample swscale avutil x264 m z rt pthread)
+
+add_executable(106 106_mp4_speedup.c)
+target_link_libraries(106 util_ff avformat avcodec avfilter swresample swscale avutil x264 m z rt pthread)

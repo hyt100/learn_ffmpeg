@@ -93,6 +93,8 @@ x264源码安装默认不会安装库，需要增加配置：
 avcodec_find_encoder_by_name("libx264");
 ```
 
+#### 106 mp4通过滤镜倍速
+
 #### PNG解码YUV (TODO)
 
 #### BMP解码YUV (TODO)

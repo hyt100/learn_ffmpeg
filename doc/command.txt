@@ -14,3 +14,7 @@ ffplay 640x360.h264
 ffplay -i /dev/video0
 ffplay -f v4l2 -input_format yuyv422 -video_size 640x480 -i /dev/video0
 ffplay -f v4l2 -input_format mjpeg -video_size 640x480 -i /dev/video0
+
+滤镜操作：
+ffmpeg -i input.mp4 -filter:v "setpts=0.5*PTS" output.mp4         //2倍加速
+
