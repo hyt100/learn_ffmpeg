@@ -77,7 +77,7 @@ x264源码安装默认不会安装库，需要增加配置：
 然后重新编译ffmpeg:
 
 ```shell
-# ./configure --enable-libx264 --enable-gpl
+# ./configure --enable-libx264 --enable-gpl --enable-shared --enable-static
 ```
 
 验证x264是否生效：
@@ -93,7 +93,11 @@ x264源码安装默认不会安装库，需要增加配置：
 avcodec_find_encoder_by_name("libx264");
 ```
 
-#### 106 mp4通过滤镜倍速
+#### 106 mp4通过滤镜倍速 (TODO)
+
+#### 107 MP4抽帧 (TODO)
+
+#### 108 YUV转MP4 (TODO)
 
 #### PNG解码YUV (TODO)
 
