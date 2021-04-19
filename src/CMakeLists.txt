@@ -36,3 +36,6 @@ target_link_libraries(106 util_ff avformat avcodec avfilter swresample swscale a
 
 add_executable(107 107_extract_frame.cc)
 target_link_libraries(107 util_ff util avformat avcodec avfilter swresample swscale avutil m z rt pthread)
+
+# add_executable(108 108_yuv_to_mp4.cc)
+# target_link_libraries(108 util_ff util avformat avcodec avfilter swresample swscale avutil m z rt pthread)

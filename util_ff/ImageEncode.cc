@@ -48,6 +48,9 @@ int image_encode(const char *filename, AVFrame* pFrame)
     pCodecCtx->height     = height;
     pCodecCtx->time_base.num = 1;
     pCodecCtx->time_base.den = 25;
+
+    // pCodecCtx->flags |= AV_CODEC_FLAG_QSCALE;
+    // pCodecCtx->global_quality = 1;
  
     //打印输出相关信息
     av_dump_format(pFormatCtx, 0, filename, 1);
@@ -59,13 +62,17 @@ int image_encode(const char *filename, AVFrame* pFrame)
         printf("Codec not found.");
         return -1;
     }
+
+    AVDictionary *dict = NULL;
+    av_dict_set_int(&dict, "qscale", 31, 0);
  
     // 设置pCodecCtx的解码器为pCodec
-    if( avcodec_open2(pCodecCtx, pCodec, NULL) < 0 )
+    if( avcodec_open2(pCodecCtx, pCodec, &dict) < 0 )
     {
         printf("Could not open codec.");
         return -1;
     }
+    av_dict_free(&dict);
  
     //================================Write Header ===============================//
     avformat_write_header(pFormatCtx, NULL);
@@ -139,7 +146,7 @@ int image_encode(const char *filename, uint8_t *buf, int size, int width, int he
             break;
         }
 
-        // copy yuv420p data
+        // copy yuv420p data 
         memcpy(frame->data[0], buf, width * height);
         memcpy(frame->data[1], buf + width * height, width * height / 4);
         memcpy(frame->data[2], buf + width * height * 5/4, width * height / 4);

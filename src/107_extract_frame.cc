@@ -40,8 +40,8 @@ static int save_jpg(AVFrame *frame)
     printf("pts=%ld \n", frame->pts/512);
 
     index++;
-    sprintf(buf, "%3d.jpg", index);
-    // image_encode(buf, frame);
+    sprintf(buf, "%d.jpg", index);
+    image_encode(buf, frame);
     return 0;
 }
 
