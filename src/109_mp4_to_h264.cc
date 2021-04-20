@@ -124,6 +124,15 @@ int VideoDemuxerRead(VideoDemuxer *demux, std::function<void(AVPacket *pkt)> fun
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
+#include "h264.h"
+
+struct FrameHeader {
+    int64_t pts;
+    int seq;
+    int type;
+    int size;
+};
+
 int main(int argc, char *argv[])
 {
     VideoDemuxer *demux = VideoDemuxerCreate("../res/640x360.mp4");
@@ -138,9 +147,18 @@ int main(int argc, char *argv[])
         return -1;
     }
 
+    int seq = 0;
+
     VideoDemuxerRead(demux, 
-        [=](AVPacket *pkt) {
-            printf("got a packet: pts=%ld \n", pkt->pts);
+        [&](AVPacket *pkt) {
+            FrameHeader header;
+            header.pts = pkt->pts;
+            header.seq = ++seq;
+            header.type = (h264_get_frame_type(pkt->data, pkt->size) == BLOCK_FLAG_TYPE_I) ? 1 : 0;
+            header.size = pkt->size;
+
+            printf("got a packet: pts=%ld seq=%d  type=%d\n", pkt->pts, header.seq, header.type);
+            fwrite(&header, sizeof(header), 1, fp);
             fwrite(pkt->data, pkt->size, 1, fp);
         }
     );
