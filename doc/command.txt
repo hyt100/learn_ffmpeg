@@ -20,3 +20,8 @@ ffmpeg -i input.mp4 -filter:v "setpts=0.5*PTS" output.mp4         //2倍加速
 
 jpg操作：
 ffmpeg -i test.mp4 -r 1 -q:v 2 -f image2 ./%08d.000000.jpg    //mp4文件抽帧，每秒抽一帧存为Jpg，jpg质量设为2 (可取值范围: 2~31)
+
+查看信息：
+ffprobe -show_frames input.mp4    //读帧信息
+ffmpeg -hwaccels                  //查看支持的硬件加速选项(cuvid:CUDA提供的GPU视频编解码选项 vdpau:?)
+ffmpeg -coders | grep cuvid       //查看cuvid提供的GPU编解码器
