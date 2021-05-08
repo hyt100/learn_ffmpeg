@@ -15,12 +15,26 @@ extern "C" {
 
 int main(int argc, char *argv[])
 {
-    FileReader f("../res/video_640x360.yuv420p");
-    if (f.is_error()) {
-        printf("read file failed\n");
-        exit(1);
+    FILE *fp = fopen("../res/720x720.yuv", "rb");
+    if (!fp) {
+        printf("fopen failed. \n");
+        return -1;
+    }
+    int width = 720;
+    int height = 720;
+    int size = width * height * 3/2;
+    uint8_t *data = new uint8_t[size];
+
+    int ret = fread(data, 1, size, fp);
+    if (ret != size) {
+        printf("fread error\n");
+        delete[] data;
+        return -1;
     }
 
-    image_encode("my.jpg", f.data(), f.size(), 640, 360, AV_PIX_FMT_YUV420P);
+    image_encode("my.jpg", data, size, width, height, AV_PIX_FMT_YUV420P);
+
+    fclose(fp);
+    delete[] data;
     return 0;
 }

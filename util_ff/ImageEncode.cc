@@ -146,10 +146,40 @@ int image_encode(const char *filename, uint8_t *buf, int size, int width, int he
             break;
         }
 
-        // copy yuv420p data 
-        memcpy(frame->data[0], buf, width * height);
-        memcpy(frame->data[1], buf + width * height, width * height / 4);
-        memcpy(frame->data[2], buf + width * height * 5/4, width * height / 4);
+        //Fixed: 如果是按照1字节对齐，才可以按照如下方式进行块拷贝；否则要按照行拷贝。
+        // 块拷贝
+        // memcpy(frame->data[0], buf, width * height);
+        // memcpy(frame->data[1], buf + width * height, width * height / 4);
+        // memcpy(frame->data[2], buf + width * height * 5/4, width * height / 4);
+
+        // 行拷贝
+        uint8_t *dst;
+        uint8_t *src;
+
+        // copy Y
+        dst = frame->data[0];
+        src = buf;
+        for (int i = 0; i < height; ++i) {
+            memcpy(dst, src, width);
+            dst += frame->linesize[0];
+            src += width;
+        }
+        // copy U
+        dst = frame->data[1];
+        src = buf + width * height;
+        for (int i = 0; i < height/2; ++i) {
+            memcpy(dst, src, width/2);
+            dst += frame->linesize[1];
+            src += width/2;
+        }
+        // copy V
+        dst = frame->data[2];
+        src = buf + width * height * 5/4;
+        for (int i = 0; i < height/2; ++i) {
+            memcpy(dst, src, width/2);
+            dst += frame->linesize[2];
+            src += width/2;
+        }
 
         ret = image_encode(filename, frame);
         if (ret < 0) {
