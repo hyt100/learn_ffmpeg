@@ -187,9 +187,40 @@ int VideoEncoderEncode(VideoEncoder *encoder, uint8_t *buf, int size)
     encoder->frame->pts ++;
 
     // copy yuv420p data
-    memcpy(encoder->frame->data[0], buf, encoder->width * encoder->height);
-    memcpy(encoder->frame->data[1], buf + encoder->width * encoder->height, encoder->width * encoder->height / 4);
-    memcpy(encoder->frame->data[2], buf + encoder->width * encoder->height * 5/4, encoder->width * encoder->height / 4);
+    // memcpy(encoder->frame->data[0], buf, encoder->width * encoder->height);
+    // memcpy(encoder->frame->data[1], buf + encoder->width * encoder->height, encoder->width * encoder->height / 4);
+    // memcpy(encoder->frame->data[2], buf + encoder->width * encoder->height * 5/4, encoder->width * encoder->height / 4);
+
+    AVFrame *frame = encoder->frame;
+    int width = encoder->width;
+    int height = encoder->height;
+    uint8_t *dst;
+    uint8_t *src;
+
+    // copy Y
+    dst = frame->data[0];
+    src = buf;
+    for (int i = 0; i < height; ++i) {
+        memcpy(dst, src, width);
+        dst += frame->linesize[0];
+        src += width;
+    }
+    // copy U
+    dst = frame->data[1];
+    src = buf + width * height;
+    for (int i = 0; i < height/2; ++i) {
+        memcpy(dst, src, width/2);
+        dst += frame->linesize[1];
+        src += width/2;
+    }
+    // copy V
+    dst = frame->data[2];
+    src = buf + width * height * 5/4;
+    for (int i = 0; i < height/2; ++i) {
+        memcpy(dst, src, width/2);
+        dst += frame->linesize[2];
+        src += width/2;
+    }
 
     return VideoEncoderEncodeDoing(encoder, encoder->frame);
 }
