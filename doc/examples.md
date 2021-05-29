@@ -62,7 +62,7 @@ MAC:
 
 #### 102 JPG解码YUV 
 
-#### 103 YUV编码JPG (TODO)
+#### 103 YUV编码JPG
 
 #### 104 H264解码YUV
 

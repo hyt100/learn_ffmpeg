@@ -6,112 +6,175 @@ extern "C" {
 #include <libavutil/samplefmt.h>
 #include <libavutil/timestamp.h>
 #include <libavformat/avformat.h>
+#include <libswscale/swscale.h>
+#include <libswresample/swresample.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <math.h>
 }
 #include <iostream>
 
 
-
-int image_encode(const char *filename, AVFrame* pFrame)
+static int write_frame(AVFormatContext *fmt_ctx, AVCodecContext *c,
+                       AVStream *st, AVFrame *frame)
 {
-    int width = pFrame->width;
-    int height = pFrame->height;
- 
-    // 分配AVFormatContext对象
-    AVFormatContext* pFormatCtx = avformat_alloc_context();
- 
-    // 设置输出文件格式
-    pFormatCtx->oformat = av_guess_format("mjpeg", NULL, NULL);
- 
-    // 创建并初始化一个和该url相关的AVIOContext
-    if( avio_open(&pFormatCtx->pb, filename, AVIO_FLAG_READ_WRITE) < 0)
-    {
-        printf("Couldn't open output file.");
-        return -1;
-    }
- 
-    // 构建一个新stream
-    AVStream* pAVStream = avformat_new_stream(pFormatCtx, 0);
-    if( pAVStream == NULL )
-    {
-        return -1;
-    }
- 
-    // 设置该stream的信息
-    AVCodecContext* pCodecCtx = pAVStream->codec;
- 
-    pCodecCtx->codec_id   = pFormatCtx->oformat->video_codec;
-    pCodecCtx->codec_type = AVMEDIA_TYPE_VIDEO;
-    pCodecCtx->pix_fmt    = AV_PIX_FMT_YUVJ420P;
-    pCodecCtx->width      = width;
-    pCodecCtx->height     = height;
-    pCodecCtx->time_base.num = 1;
-    pCodecCtx->time_base.den = 25;
+    int ret;
 
-    // pCodecCtx->flags |= AV_CODEC_FLAG_QSCALE;
-    // pCodecCtx->global_quality = 1;
- 
-    //打印输出相关信息
-    av_dump_format(pFormatCtx, 0, filename, 1);
- 
-    //================================== 查找编码器 ==================================//
-    AVCodec* pCodec = avcodec_find_encoder(pCodecCtx->codec_id);
-    if( !pCodec )
-    {
-        printf("Codec not found.");
-        return -1;
+    // send the frame to the encoder
+    ret = avcodec_send_frame(c, frame);
+    if (ret < 0) {
+        fprintf(stderr, "Error sending a frame to the encoder \n");
+        exit(1);
     }
 
-    AVDictionary *dict = NULL;
-    av_dict_set_int(&dict, "qscale", 31, 0);
- 
-    // 设置pCodecCtx的解码器为pCodec
-    if( avcodec_open2(pCodecCtx, pCodec, &dict) < 0 )
-    {
-        printf("Could not open codec.");
-        return -1;
+    while (ret >= 0) {
+        AVPacket pkt = { 0 };
+
+        ret = avcodec_receive_packet(c, &pkt);
+        if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
+            break;
+        else if (ret < 0) {
+            fprintf(stderr, "Error encoding a frame\n");
+            return -1;
+        }
+
+        /* rescale output packet timestamp values from codec to stream timebase */
+        av_packet_rescale_ts(&pkt, c->time_base, st->time_base);
+        pkt.stream_index = st->index;
+
+        /* Write the compressed frame to the media file. */
+        ret = av_interleaved_write_frame(fmt_ctx, &pkt);
+        av_packet_unref(&pkt);
+        if (ret < 0) {
+            fprintf(stderr, "Error while writing output packet\n");
+            return -1;
+        }
     }
-    av_dict_free(&dict);
- 
-    //================================Write Header ===============================//
-    avformat_write_header(pFormatCtx, NULL);
- 
-    int y_size = pCodecCtx->width * pCodecCtx->height;
- 
-    //==================================== 编码 ==================================//
-    // 给AVPacket分配足够大的空间
-    AVPacket pkt;
-    av_new_packet(&pkt, y_size * 3);
- 
-    //
-    int got_picture = 0;
-    int ret = avcodec_encode_video2(pCodecCtx, &pkt, pFrame, &got_picture);
-    if( ret < 0 )
-    {
-        printf("Encode Error.\n");
-        return -1;
+
+    return ret == AVERROR_EOF ? 1 : 0;
+}
+
+int image_encode(const char *filename, AVFrame *frame)
+{
+    AVOutputFormat *fmt = NULL;
+    AVFormatContext *oc = NULL;
+    AVCodec *codec = NULL;
+    AVCodecContext *codec_ctx = NULL;
+    AVStream *st = NULL;
+    int ret;
+    AVDictionary *opt = NULL;
+
+    int width = frame->width;
+    int height = frame->height;
+
+    /* allocate the output media context */
+    avformat_alloc_output_context2(&oc, NULL, NULL, filename);
+    if (!oc) {
+        printf("Could not deduce output format from file extension\n");
+        goto FAIL;
     }
-    if( got_picture == 1 )
-    {
-        pkt.stream_index = pAVStream->index;
-        ret = av_write_frame(pFormatCtx, &pkt);
+    fmt = oc->oformat;
+
+    /* find the encoder */
+    codec = avcodec_find_encoder(fmt->video_codec);
+    if (!codec) {
+        fprintf(stderr, "Could not find encoder \n");
+        goto FAIL;
     }
- 
-    av_free_packet(&pkt);
- 
-    //Write Trailer
-    av_write_trailer(pFormatCtx);
- 
- 
-    if( pAVStream )
-    {
-        avcodec_close(pAVStream->codec);
+
+    st = avformat_new_stream(oc, NULL);
+    if (!st) {
+        fprintf(stderr, "Could not allocate stream\n");
+        goto FAIL;
     }
-    avio_close(pFormatCtx->pb);
-    avformat_free_context(pFormatCtx);
- 
+    st->id = oc->nb_streams-1;
+
+    codec_ctx = avcodec_alloc_context3(codec);
+    if (!codec_ctx) {
+        fprintf(stderr, "Could not alloc an encoding context\n");
+        goto FAIL;
+    }
+
+    codec_ctx->codec_id = oc->oformat->video_codec;
+    codec_ctx->codec_type = AVMEDIA_TYPE_VIDEO;
+    codec_ctx->pix_fmt = AV_PIX_FMT_YUVJ420P;
+    codec_ctx->width = width;
+    codec_ctx->height = height;
+    codec_ctx->time_base = (AVRational){1, 25};
+
+    /* Some formats want stream headers to be separate. */
+    if (oc->oformat->flags & AVFMT_GLOBALHEADER)
+        codec_ctx->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+
+    /* open the codec */
+    ret = avcodec_open2(codec_ctx, codec, &opt);
+    if (ret < 0) {
+        fprintf(stderr, "Could not open video codec\n");
+        goto FAIL;
+    }
+
+    /* copy the stream parameters to the muxer */
+    ret = avcodec_parameters_from_context(st->codecpar, codec_ctx);
+    if (ret < 0) {
+        fprintf(stderr, "Could not copy the stream parameters\n");
+        goto FAIL;
+    }
+
+    av_dump_format(oc, 0, filename, 1);
+
+    /* open the output file, if needed */
+    if (!(fmt->flags & AVFMT_NOFILE)) {
+        ret = avio_open(&oc->pb, filename, AVIO_FLAG_WRITE);
+        if (ret < 0) {
+            fprintf(stderr, "Could not open '%s'\n", filename);
+            goto FAIL;
+        }
+    }
+
+    /* Write the stream header, if any. */
+    ret = avformat_write_header(oc, &opt);
+    if (ret < 0) {
+        fprintf(stderr, "Error occurred when opening output file\n");
+        goto FAIL;
+    }
+
+    ret = write_frame(oc, codec_ctx, st, frame);
+    if (ret < 0) {
+        printf("encode failed\n");
+        goto FAIL;
+    }
+
+    /* Write the trailer, if any. The trailer must be written before you
+     * close the CodecContexts open when you wrote the header; otherwise
+     * av_write_trailer() may try to use memory that was freed on
+     * av_codec_close(). */
+    av_write_trailer(oc);
+
+    /* Close each codec. */
+    avcodec_free_context(&codec_ctx);
+
+    if (!(fmt->flags & AVFMT_NOFILE))
+        /* Close the output file. */
+        avio_closep(&oc->pb);
+
+    /* free the stream */
+    avformat_free_context(oc);
+
+    if (opt) {
+        av_dict_free(&opt);
+    }
+
     return 0;
+
+FAIL:
+    if (codec_ctx)
+        avcodec_free_context(&codec_ctx);
+    if (oc)
+        avformat_free_context(oc);
+    if (opt)
+        av_dict_free(&opt);
+    return -1;
 }
 
 int image_encode(const char *filename, uint8_t *buf, int size, int width, int height, int pix_fmt)
