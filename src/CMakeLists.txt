@@ -13,6 +13,9 @@ target_link_libraries(004 util)
 add_executable(010 010_capture.cc)
 target_link_libraries(010 util SDL2 pthread)
 
+add_executable(012 012_rotate.cc)
+target_link_libraries(012 util yuv)
+
 add_executable(100 100_capture_mjpeg.cc)
 target_link_libraries(100 util avdevice avfilter avformat avcodec swresample swscale avutil SDL2 m rt z pthread)
 

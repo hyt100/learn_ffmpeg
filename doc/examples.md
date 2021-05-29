@@ -48,15 +48,11 @@ MAC:
 
 #### 011 非ffmpeg: 给YUV增加黑色边框 (TODO)
 
-#### 012 非ffmpeg: OPENGL渲染视频 (TODO)
+#### 012 非ffmpeg: YUV旋转 (libyuv加速)
 
-#### 013 非ffmpeg: YUV转RGB，OPENGL实现 (TODO)
+#### 非ffmpeg: YUV镜像 (TODO)
 
 #### 非ffmpeg: 搜索H264文件NALU (TODO)
-
-#### 非ffmpeg: YUV镜像(TODO)
-
-#### 非ffmpeg: YUV旋转(TODO)
 
 ---
 
